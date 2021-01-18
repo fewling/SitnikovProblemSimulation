@@ -19,19 +19,24 @@ import javafx.util.Duration;
 
 public class Main extends Application {
 
+    public static final int SCREEN_WIDTH = 800;
+    public static final int SCREEN_HEIGHT = 800;
+    public static final int FAR_CLIP = 20000;           // Maximum range of camera view
+    public static final double NEAR_CLIP = 0.1;         // Minimum range of camera view
+
     // initial condition:
+    private static final double TIMESTEP = 0.5;         // Customizable
+    private static final double GM = 40000;             // Customizable, Gravitational Constant
+    private static final double LARGE_RADIUS = 20;      // Radius for M1 & M2
+    private static final double SMALL_RADIUS = 5;       // Radius for M3
     private double xOfSphere1 = -300, yOfSphere1 = 0;
     private double xOfSphere2 = 300, yOfSphere2 = 0;
     private double vxOfSphere1 = 0, vyOfSphere1 = 5;
     private double vxOfSphere2 = 0, vyOfSphere2 = -5;
     private final double xOfSphere3 = 0;
     private final double yOfSphere3 = 0;
-    private double zOfSphere3 = 0;                  // Customizable
-    private double vzOfSphere3 = 3;                 // Customizable, but depends on zOfSphere, max when zOfSphere == 0
-    private static final double TIMESTEP = 0.75;    // Customizable
-    private static final double GM = 40000;         // Customizable, Gravitational Constant
-    private static final double LARGE_RADIUS = 20;  // Radius for M1 & M2
-    private static final double SMALL_RADIUS = 5;   // Radius for M3
+    private double zOfSphere3 = 0;                      // Customizable
+    private double vzOfSphere3 = 3;                     // Customizable, but depends on zOfSphere, max when zOfSphere == 0
 
 
     private final Sphere sphere1 = new Sphere();
@@ -81,10 +86,11 @@ public class Main extends Application {
         pane.getChildren().add(sphere3);
 
         // Create scene to hold the pane and attach Camera
-        Scene scene = new Scene(pane, 800, 800);
+        Scene scene = new Scene(pane, SCREEN_WIDTH, SCREEN_HEIGHT);
         scene.setFill(Color.SILVER);
         scene.setCamera(camera);
 
+        // For timestep = 0.75:
         // TranslateX: 0.0, TranslateY: 935.0, TranslateZ: -655.0,
         // RotateX: 70.0, RotateY: 0.0, RotateZ: 0.0
 
@@ -99,8 +105,8 @@ public class Main extends Application {
         camera.translateZProperty().set(-1000);
 
         // Set the clipping planes
-        camera.setNearClip(0.1);
-        camera.setFarClip(2000);
+        camera.setNearClip(NEAR_CLIP);
+        camera.setFarClip(FAR_CLIP);
         ((PerspectiveCamera) camera).setFieldOfView(35);
 
         // Camera control:
@@ -114,8 +120,8 @@ public class Main extends Application {
                 case RIGHT -> rotateY.setAngle(rotateY.getAngle() - 5);
                 case UP -> rotateX.setAngle(rotateX.getAngle() - 5);
                 case DOWN -> rotateX.setAngle(rotateX.getAngle() + 5);
-                case Y -> translate.setZ(translate.getZ() + 5);
-                case H -> translate.setZ(translate.getZ() - 5);
+                case I -> translate.setZ(translate.getZ() + 5);
+                case O -> translate.setZ(translate.getZ() - 5);
             }
         });
 
