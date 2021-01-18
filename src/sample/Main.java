@@ -3,17 +3,21 @@ package sample;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Sphere;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -22,7 +26,7 @@ public class Main extends Application {
     private final Sphere sphere1 = new Sphere();
     private final Sphere sphere2 = new Sphere();
     private final Sphere sphere3 = new Sphere();
-    private final double timeStep = 1;
+    private final double timeStep = 0.75;
     private final int GM = 40000;
     private double powerOfPosition; // Just making the calculation easier to read
 
@@ -38,17 +42,18 @@ public class Main extends Application {
 
     private final int largeRadius = 20;
     private final int smallRadius = 5;
-    private final int offsetX = 400;
-    private final int offsetY = 400;
 
     private double powOfXOfSphere1;
     private double powOfYOfSphere1;
     private double powOfXOfSphere2;
     private double powOfYOfSphere2;
     private double powZOfSphere3;
-    private double paneY = 0;
-    private double paneX = 0;
-    private int rotate;
+    private double lastX1, lastY1, lastX2, lastY2;
+    private Rotate rotateX, rotateY, rotateZ;
+    public static Camera camera = new PerspectiveCamera(true);
+    private Translate translate;
+    private Line line;
+    private Pane pane;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -57,8 +62,9 @@ public class Main extends Application {
         sphere1.setRadius(largeRadius);
         sphere2.setRadius(largeRadius);
         sphere3.setRadius(smallRadius);
+        line = new Line();
 
-        // Setting the colors:
+        // Setting the appearances:
         PhongMaterial material1 = new PhongMaterial();
         material1.setDiffuseColor(Color.ORANGE);
         material1.setSpecularColor(Color.BLACK);
@@ -70,7 +76,7 @@ public class Main extends Application {
         sphere2.setMaterial(material2);
 
         PhongMaterial material3 = new PhongMaterial();
-        material3.setDiffuseColor(Color.HONEYDEW);
+        material3.setDiffuseColor(Color.SEAGREEN);
         material3.setSpecularColor(Color.BLACK);
         sphere3.setMaterial(material3);
 
@@ -79,57 +85,84 @@ public class Main extends Application {
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.play();
 
-
-        Pane pane = new Pane();
+        // Create pane to hold the spheres
+        pane = new Pane();
         pane.getChildren().add(sphere1);
         pane.getChildren().add(sphere2);
         pane.getChildren().add(sphere3);
+        pane.getChildren().add(line);
 
-        Scene scene = new Scene(pane, 1200, 850);
-        Camera camera = new PerspectiveCamera(true);
+        // Create scene to hold the pane and attach Camera
+        Scene scene = new Scene(pane, 800, 800);
+        scene.setFill(Color.SILVER);
         scene.setCamera(camera);
 
-        //Move back a little to get a good view of the sphere
-        camera.translateZProperty().set(-800);
+        // TranslateX: 0.0, TranslateY: 935.0, TranslateZ: -655.0,
+        // RotateX: 70.0, RotateY: 0.0, RotateZ: 0.0
 
-        //Set the clipping planes
+        // MOVE CAMERA
+        camera.getTransforms().addAll(
+                rotateX = new Rotate(70, Rotate.X_AXIS),
+                rotateY = new Rotate(0, Rotate.Y_AXIS),
+                rotateZ = new Rotate(0, Rotate.Z_AXIS),
+                translate = new Translate(0, 935, -655));
+
+        // Move camera to a good view
+        camera.translateZProperty().set(-1000);
+
+        // Set the clipping planes
         camera.setNearClip(0.1);
         camera.setFarClip(2000);
         ((PerspectiveCamera) camera).setFieldOfView(35);
 
-        Group cameraGroup = new Group();
-        cameraGroup.getChildren().add(camera);
-        pane.getChildren().add(cameraGroup);
-
-        primaryStage.setTitle("Sitnikov's Problem Simulator");
-        primaryStage.setScene(scene);
-
         primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             switch (event.getCode()) {
+                case A:
+                    translate.setX(translate.getX() - 5);
+                    break;
+                case D:
+                    translate.setX(translate.getX() + 5);
+                    break;
                 case W:
-                    camera.translateZProperty().set(camera.getTranslateZ() + 100);
-                    System.out.println("Pressed W");
+                    translate.setY(translate.getY() + 5);
                     break;
                 case S:
-                    camera.translateZProperty().set(camera.getTranslateZ() - 100);
-                    System.out.println("Pressed S");
+                    translate.setY(translate.getY() - 5);
                     break;
-
+                case LEFT:
+                    rotateZ.setAngle(rotateY.getAngle() + 5);
+                    break;
+                case RIGHT:
+                    rotateY.setAngle(rotateY.getAngle() - 5);
+                    break;
                 case UP:
-                    rotate =+ 10;
-                    camera.setRotate(rotate);
+                    rotateX.setAngle(rotateX.getAngle() - 5);
                     break;
-
                 case DOWN:
-                    rotate -= 10;
-                    camera.setRotate(rotate);
+                    rotateX.setAngle(rotateX.getAngle() + 5);
+                    break;
+                case Y:
+                    translate.setZ(translate.getZ() + 5);
+                    System.out.println("hi");
+                    break;
+                case H:
+                    translate.setZ(translate.getZ() - 5);
                     break;
             }
         });
+
+        primaryStage.setTitle("Sitnikov's Problem Simulator");
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     private void calculate() {
+
+        // record current locations:
+        lastX1 = xOfSphere1;
+        lastY1 = yOfSphere1;
+        lastX2 = xOfSphere2;
+        lastY2 = yOfSphere2;
 
         powOfXOfSphere1 = Math.pow(xOfSphere1, 2);
         powOfYOfSphere1 = Math.pow(yOfSphere1, 2);
@@ -175,15 +208,26 @@ public class Main extends Application {
 
     private void move(double x1, double y1, double x2, double y2, double z) {
 
-        sphere1.setTranslateX(x1);
-        sphere1.setTranslateY(y1);
+        // draw tracks:
+        pane.getChildren().add(new Line(lastX1, lastY1, x1, y1));
+        pane.getChildren().add(new Line(lastX2, lastY2, x2, y2));
 
-        sphere2.setTranslateX(x2);
-        sphere2.setTranslateY(y2);
+        sphere1.translateXProperty().set(x1);
+        sphere1.translateYProperty().set(y1);
 
-        sphere3.setTranslateX(xOfSphere3);
-        sphere3.setTranslateY(yOfSphere3);
-        sphere3.setTranslateZ(z);
+        sphere2.translateXProperty().set(x2);
+        sphere2.translateYProperty().set(y2);
+
+        sphere3.translateXProperty().set(xOfSphere3);
+        sphere3.translateYProperty().set(yOfSphere3);
+        sphere3.translateZProperty().set(z);
+
+        System.out.print("TranslateX: " + translate.getX());
+        System.out.print(", TranslateY: " + translate.getY());
+        System.out.print(", TranslateZ: " + translate.getZ());
+        System.out.print(", RotateX: " + rotateX.getAngle());
+        System.out.print(", RotateY: " + rotateY.getAngle());
+        System.out.println(", RotateZ: " + rotateZ.getAngle());
     }
 
     public static void main(String[] args) {
