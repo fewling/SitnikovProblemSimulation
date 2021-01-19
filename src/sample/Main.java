@@ -6,8 +6,11 @@ import javafx.application.Application;
 import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Line;
@@ -19,24 +22,26 @@ import javafx.util.Duration;
 
 public class Main extends Application {
 
+
     public static final int SCREEN_WIDTH = 800;
     public static final int SCREEN_HEIGHT = 800;
     public static final int FAR_CLIP = 20000;           // Maximum range of camera view
     public static final double NEAR_CLIP = 0.1;         // Minimum range of camera view
 
-    // initial condition:
-    private static final double TIMESTEP = 0.5;         // Customizable
-    private static final double GM = 40000;             // Customizable, Gravitational Constant
+    // Initial conditions:
+    private static final double TIMESTEP = 1;           // Customizable
+    private static final double GM = 40000;             // Customizable, Gravitational Constant (M1 &2)
+    private static final double Gm = 200;               // Customizable, Gravitational Constant (M3)
     private static final double LARGE_RADIUS = 20;      // Radius for M1 & M2
     private static final double SMALL_RADIUS = 5;       // Radius for M3
     private double xOfSphere1 = -300, yOfSphere1 = 0;
     private double xOfSphere2 = 300, yOfSphere2 = 0;
-    private double vxOfSphere1 = 0, vyOfSphere1 = 5;
-    private double vxOfSphere2 = 0, vyOfSphere2 = -5;
+    private double vXOfSphere1 = 0, vYOfSphere1 = 5;
+    private double vXOfSphere2 = 0, vYOfSphere2 = -5;
     private final double xOfSphere3 = 0;
     private final double yOfSphere3 = 0;
     private double zOfSphere3 = 0;                      // Customizable
-    private double vzOfSphere3 = 3;                     // Customizable, but depends on zOfSphere, max when zOfSphere == 0
+    private double vZOfSphere3 = 3;                     // Customizable, but depends on zOfSphere, max when zOfSphere == 0
 
 
     private final Sphere sphere1 = new Sphere();
@@ -48,7 +53,7 @@ public class Main extends Application {
     private Rotate rotateX, rotateY, rotateZ;
     public static Camera camera = new PerspectiveCamera(true); // true --> eye fixed on (0, 0, 0)
     private Translate translate;
-    private Pane pane;
+    private Pane displayPane;
 
     @Override
     public void start(Stage primaryStage) {
@@ -75,20 +80,28 @@ public class Main extends Application {
         sphere3.setMaterial(material3);
 
         // Setting the animation
-        Timeline animation = new Timeline(new KeyFrame(Duration.millis(20), e -> calculate()));
+        Timeline animation = new Timeline(new KeyFrame(Duration.millis(10), e -> calculate()));
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.play();
 
-        // Create pane to hold the spheres
-        pane = new Pane();
-        pane.getChildren().add(sphere1);
-        pane.getChildren().add(sphere2);
-        pane.getChildren().add(sphere3);
+        // Create pane to display the spheres
+        displayPane = new Pane();
+        displayPane.getChildren().add(sphere1);
+        displayPane.getChildren().add(sphere2);
+        displayPane.getChildren().add(sphere3);
 
-        // Create scene to hold the pane and attach Camera
-        Scene scene = new Scene(pane, SCREEN_WIDTH, SCREEN_HEIGHT);
+        // Create subscene to hold the displayPane and attach camera
+        SubScene subScene = new SubScene(displayPane, 600, 600);
+        subScene.setCamera(camera);
+
+        // Create splitPane to hold both controls and the subscene with displayPane
+        SplitPane splitPane = new SplitPane();
+        VBox leftControl = new VBox();
+        splitPane.getItems().addAll(leftControl, subScene);
+
+        // Create a main scene to hold the splitPane
+        Scene scene = new Scene(splitPane, SCREEN_WIDTH, SCREEN_HEIGHT);
         scene.setFill(Color.SILVER);
-        scene.setCamera(camera);
 
         // For timestep = 0.75:
         // TranslateX: 0.0, TranslateY: 935.0, TranslateZ: -655.0,
@@ -97,9 +110,11 @@ public class Main extends Application {
         // MOVE CAMERA
         camera.getTransforms().addAll(
                 rotateX = new Rotate(70, Rotate.X_AXIS),
+//                rotateX = new Rotate(0, Rotate.X_AXIS),
                 rotateY = new Rotate(0, Rotate.Y_AXIS),
                 rotateZ = new Rotate(0, Rotate.Z_AXIS),
                 translate = new Translate(0, 935, -655));
+//                translate = new Translate(0, 0, 0));
 
         // Move camera to a good view
         camera.translateZProperty().set(-1000);
@@ -109,7 +124,7 @@ public class Main extends Application {
         camera.setFarClip(FAR_CLIP);
         ((PerspectiveCamera) camera).setFieldOfView(35);
 
-        // Camera control:
+        // Camera controls:
         primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             switch (event.getCode()) {
                 case A -> translate.setX(translate.getX() - 5);
@@ -141,38 +156,40 @@ public class Main extends Application {
         // Just separating the calculation steps for M1
         double powX1 = Math.pow(xOfSphere1, 2);
         double powY1 = Math.pow(yOfSphere1, 2);
-        double powerOfPosition = Math.pow(powX1 + powY1, 1.5);
+        double powZ3 = Math.pow(zOfSphere3, 2);
+        double powXY = Math.pow(powX1 + powY1, 1.5);
+        double powXYZ = Math.pow(powX1 + powY1 + powZ3, 1.5);
 
         // Calculate and update velocities and locations (M1):
-        vxOfSphere1 = vxOfSphere1 + ((-1) * GM / (2 * powerOfPosition)) * xOfSphere1 * TIMESTEP;
-        xOfSphere1 = xOfSphere1 + vxOfSphere1;
+        vXOfSphere1 = vXOfSphere1 + (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * xOfSphere1 * TIMESTEP;
+        xOfSphere1 = xOfSphere1 + vXOfSphere1;
 
-        vyOfSphere1 = vyOfSphere1 + ((-1) * GM / (2 * powerOfPosition)) * yOfSphere1 * TIMESTEP;
-        yOfSphere1 = yOfSphere1 + vyOfSphere1;
+        vYOfSphere1 = vYOfSphere1 + (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * yOfSphere1 * TIMESTEP;
+        yOfSphere1 = yOfSphere1 + vYOfSphere1;
 
 
         // Just separating the calculation steps for M2
         double powX2 = Math.pow(xOfSphere2, 2);
         double powY2 = Math.pow(yOfSphere2, 2);
-        powerOfPosition = Math.pow(powX2 + powY2, 1.5);
+        powXY = Math.pow(powX2 + powY2, 1.5);
+        powXYZ = Math.pow(powX1 + powY1 + powZ3, 1.5);
 
         // Calculate and update velocities and locations (M2):
-        vxOfSphere2 = vxOfSphere2 + ((-1) * GM / (2 * powerOfPosition)) * xOfSphere2 * TIMESTEP;
-        xOfSphere2 = xOfSphere2 + vxOfSphere2;
+        vXOfSphere2 = vXOfSphere2 + (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * xOfSphere2 * TIMESTEP;
+        xOfSphere2 = xOfSphere2 + vXOfSphere2;
 
-        vyOfSphere2 = vyOfSphere2 + ((-1) * GM / (2 * powerOfPosition)) * yOfSphere2 * TIMESTEP;
-        yOfSphere2 = yOfSphere2 + vyOfSphere2;
+        vYOfSphere2 = vYOfSphere2 + (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * yOfSphere2 * TIMESTEP;
+        yOfSphere2 = yOfSphere2 + vYOfSphere2;
 
 
         // Just separating the calculation steps for M3
         double powXDiff = Math.pow(xOfSphere2 - xOfSphere1, 2);
         double powYDiff = Math.pow(yOfSphere2 - yOfSphere1, 2);
-        double powZ3 = Math.pow(zOfSphere3, 2);
-        powerOfPosition = Math.pow(powXDiff + powYDiff + powZ3, 1.5);
+        powXY = Math.pow(powXDiff + powYDiff + powZ3, 1.5);
 
         // Calculate and update velocities and locations (M3):
-        vzOfSphere3 = vzOfSphere3 + (-1) * ((4 * GM) / powerOfPosition) * zOfSphere3 * TIMESTEP;
-        zOfSphere3 = zOfSphere3 + vzOfSphere3;
+        vZOfSphere3 = vZOfSphere3 + (-1) * ((4 * GM) / powXY) * zOfSphere3 * TIMESTEP;
+        zOfSphere3 = zOfSphere3 + vZOfSphere3;
 
         move(xOfSphere1, yOfSphere1, xOfSphere2, yOfSphere2, zOfSphere3);
     }
@@ -180,8 +197,8 @@ public class Main extends Application {
     private void move(double x1, double y1, double x2, double y2, double z) {
 
         // draw tracks of M1 & M2:
-        pane.getChildren().add(new Line(lastX1, lastY1, x1, y1));
-        pane.getChildren().add(new Line(lastX2, lastY2, x2, y2));
+        displayPane.getChildren().add(new Line(lastX1, lastY1, x1, y1));
+        displayPane.getChildren().add(new Line(lastX2, lastY2, x2, y2));
 
         // Move M1
         sphere1.translateXProperty().set(x1);
