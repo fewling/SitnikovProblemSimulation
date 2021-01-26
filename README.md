@@ -20,7 +20,7 @@ Example gif from Scholarpedia:\
 
 
 # What does this project do?
-By using JavaFX to **visualize** Sitnikov Problem and allow **interaction**, that users are able to change different variables to observe the fate of the system,
+By using JavaFX to **visualize** Sitnikov Problem and allow **interactions**, that users are able to change different variables to observe the fate of the system,
 (for now) these include:
 1) Masses of the bodies (including the massless body)
 2) Eccentricity of the orbit
