@@ -3,7 +3,6 @@ package sample;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
@@ -98,6 +97,9 @@ public class Main extends Application {
 
     private double mouseStartX, mouseStartY;
     private boolean primaryPressed = false, secondaryPressed = false, bothPressed = false;
+
+    public Main() {
+    }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -256,7 +258,7 @@ public class Main extends Application {
         animation.play();
     }
 
-    private Scene setupScene() {
+    private Scene setupScene() throws IOException {
         // Create pane to display the spheres and lines
         displayPane = new Pane();
         displayPane.getChildren().add(sphere1);
@@ -277,26 +279,6 @@ public class Main extends Application {
         topViewBtn.setDisable(false);
         tiltViewBtn.setDisable(true);
 
-        topViewBtn.setOnAction(actionEvent -> {
-            camera.getTransforms().addAll(
-                    rotateX = new Rotate(290, Rotate.X_AXIS),
-                    rotateY = new Rotate(0, Rotate.Y_AXIS),
-                    rotateZ = new Rotate(0, Rotate.Z_AXIS),
-                    translate = new Translate(-60, -935, -1030));
-            topViewBtn.setDisable(true);
-            tiltViewBtn.setDisable(false);
-        });
-
-        tiltViewBtn.setOnAction(actionEvent -> {
-            camera.getTransforms().addAll(
-                    rotateX = new Rotate(70, Rotate.X_AXIS),
-                    rotateY = new Rotate(0, Rotate.Y_AXIS),
-                    rotateZ = new Rotate(0, Rotate.Z_AXIS),
-                    translate = new Translate(60, 935, -1030));
-            topViewBtn.setDisable(false);
-            tiltViewBtn.setDisable(true);
-        });
-
         leftControl.getChildren().add(topViewBtn);
         leftControl.getChildren().add(tiltViewBtn);
         leftControl.getChildren().add(currentSphere1XLabel);
@@ -316,6 +298,7 @@ public class Main extends Application {
         splitPane.getItems().addAll(leftControl, subScene);
 
         // Create a main scene to hold the splitPane
+//        Parent root = FXMLLoader.load(getClass().getResource("menu.fxml"));
         Scene scene = new Scene(splitPane, SCREEN_WIDTH, SCREEN_HEIGHT);
         scene.setFill(Color.SILVER);
         return scene;
@@ -389,11 +372,11 @@ public class Main extends Application {
         double powX2 = Math.pow(x2, 2);
         double powY2 = Math.pow(y2, 2);
         powXY = Math.pow(powX2 + powY2, 1.5);
-        powXYZ = Math.pow(powX1 + powY1 + powZ3, 1.5);
+        powXYZ = Math.pow(powX2 + powY2 + powZ3, 1.5);
 
 
         // Calculate and update velocities and locations (M2):
-        vX2 = vX2 + (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * x2 * TIMESTEP;
+        vX2 += (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * x2 * TIMESTEP;
         x2 += lastVXOfSphere2 * TIMESTEP;
 
         vY2 += (((2 * Gm) / powXYZ) - GM / (2 * powXY)) * y2 * TIMESTEP;

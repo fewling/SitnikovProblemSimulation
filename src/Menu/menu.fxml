@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane fx:id="leftSplitPane" minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="236.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Menu.MenuController">
+   <children>
+      <Label fx:id="timeStepLabel" layoutX="8.0" layoutY="16.0" text="Time Step:" AnchorPane.bottomAnchor="365.0" AnchorPane.leftAnchor="8.0" AnchorPane.topAnchor="16.0" />
+      <TextField fx:id="timeStepTextField" layoutX="75.0" layoutY="10.0" prefHeight="25.0" prefWidth="85.0" promptText="0.001 (smaller --&gt; accuracy)" text="0.01" AnchorPane.bottomAnchor="363.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="10.0" />
+      <Label fx:id="GMLabel" alignment="CENTER_RIGHT" layoutX="8.0" layoutY="44.0" prefHeight="17.0" prefWidth="56.0" text="GM:" textAlignment="RIGHT" AnchorPane.bottomAnchor="337.0" AnchorPane.leftAnchor="8.0" AnchorPane.topAnchor="44.0" />
+      <TextField fx:id="GMTextField" layoutX="76.0" layoutY="40.0" prefHeight="25.0" prefWidth="85.0" promptText="For primaries" text="40000" AnchorPane.bottomAnchor="333.0" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="40.0" />
+      <Label fx:id="GMLabel1" alignment="CENTER_RIGHT" layoutX="8.0" layoutY="74.0" prefHeight="17.0" prefWidth="56.0" text="Gm:" textAlignment="RIGHT" AnchorPane.bottomAnchor="307.0" AnchorPane.leftAnchor="8.0" AnchorPane.topAnchor="74.0" />
+      <TextField fx:id="GmTextField" layoutX="75.0" layoutY="70.0" prefHeight="25.0" prefWidth="86.0" promptText="For 3rd body" text="0" AnchorPane.bottomAnchor="303.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="70.0" />
+      <GridPane fx:id="initialPosGridPane" layoutX="8.0" layoutY="140.0" prefHeight="90.0" prefWidth="170.0" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="140.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="51.5" minWidth="10.0" prefWidth="28.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="74.0" minWidth="10.0" prefWidth="61.5" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="91.5" minWidth="10.0" prefWidth="85.5" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="M1:" textAlignment="CENTER" GridPane.halignment="CENTER" />
+            <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="M2:" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="M3:" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <TextField fx:id="m1InitialPosTextField" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="50.0" prefWidth="60.0" promptText="x only" text="-300" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="m3InitialPosTextField" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="z only" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </GridPane.margin>
+            </TextField>
+            <Label fx:id="m2InitialPosLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="39.0" prefWidth="60.0" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets top="8.0" />
+               </GridPane.margin>
+            </Label>
+            <Label fx:id="m2InitialVelocityLabel" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="50.0" prefWidth="77.0" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets top="8.0" />
+               </GridPane.margin>
+            </Label>
+            <TextField fx:id="m1InitialVelocityTextField" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="51.0" prefWidth="85.0" promptText="max v(y)" text="5" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="m3InitialVelocityTextField" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="v(z)" text="3" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+               <GridPane.margin>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </GridPane.margin>
+            </TextField>
+         </children>
+      </GridPane>
+      <Label layoutX="8.0" layoutY="120.0" text="Initial positions &amp; velocities:" AnchorPane.bottomAnchor="261.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="120.0" />
+      <CheckBox fx:id="drawTrackCheckBox" layoutX="85.0" layoutY="247.0" mnemonicParsing="false" AnchorPane.bottomAnchor="134.0" AnchorPane.leftAnchor="85.0" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="247.0" />
+      <Label layoutX="12.0" layoutY="249.0" text="Draw tracks:" AnchorPane.bottomAnchor="132.0" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="159.5" AnchorPane.topAnchor="249.0" />
+      <Button fx:id="startButton" layoutX="97.0" layoutY="338.0" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#onStartButtonClicked" text="Start" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="97.0" AnchorPane.rightAnchor="97.0" AnchorPane.topAnchor="338.0" />
+      <Label fx:id="errorLabel" layoutX="79.0" layoutY="310.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="75.0" />
+   </children>
+</AnchorPane>
