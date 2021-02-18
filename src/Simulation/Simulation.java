@@ -34,8 +34,8 @@ public class Simulation extends Application {
     private static final double SUBSCENE_WIDTH = 800;
     private static final double SUBSCENE_HEIGHT = 800;
 
-    private static final double LARGE_RADIUS = 20;
-    private static final double SMALL_RADIUS = 5;
+    private static final double LARGE_RADIUS = 10;
+    private static final double SMALL_RADIUS = 8;
 
     private final double timeStep;
     private final double GM;
@@ -54,6 +54,9 @@ public class Simulation extends Application {
     private Translate cameraTranslate;
     private Rotate cameraRotateX, cameraRotateY, cameraRotateZ;
     private final int cameraStep = 10;
+
+    private int cycleCount = 0, yCount = 0;
+    private boolean touchedYAxis = true;
 
     // Constructor receives the input fields
     public Simulation(Map<String, String> inputFieldMap) {
@@ -102,7 +105,7 @@ public class Simulation extends Application {
         camera.setFarClip(20000);
         camera.setNearClip(0.1);
         subScene.setCamera(camera);
-        cameraTranslate = new Translate(880, 1670, -560);
+        cameraTranslate = new Translate(960, 1870, -680);
         cameraRotateX = new Rotate(70, Rotate.X_AXIS);
         cameraRotateY = new Rotate(-25, Rotate.Y_AXIS);
         cameraRotateZ = new Rotate(-10, Rotate.Z_AXIS);
@@ -136,10 +139,9 @@ public class Simulation extends Application {
         sphere2.setRadius(LARGE_RADIUS);
         sphere3.setRadius(SMALL_RADIUS);
 
-        Point3D origin = new Point3D(0, 0, 0);
-        xAxis = createCylinderLine(origin, new Point3D(500, 0, 0));
-        yAxis = createCylinderLine(origin, new Point3D(0, 500, 0));
-        zAxis = createCylinderLine(origin, new Point3D(0, 0, 500));
+        xAxis = createCylinderLine(new Point3D(-500, 0, 0), new Point3D(500, 0, 0));
+        yAxis = createCylinderLine(new Point3D(0, -500, 0), new Point3D(0, 500, 0));
+        zAxis = createCylinderLine(new Point3D(0, 0, -300), new Point3D(0, 0, 300));
 
         PhongMaterial material1 = new PhongMaterial();
         material1.setDiffuseColor(Color.ORANGE);
@@ -254,7 +256,31 @@ public class Simulation extends Application {
         if (drawTrack) {
             drawTracks(x1, y1, x2, y2, lastX1, lastY1, lastX2, lastY2);
         }
+        countCycle();
         move(x1, y1, x2, y2, z3);
+    }
+
+    private void countCycle() {
+        if (Math.round(y1) == 0 && !touchedYAxis) {
+            yCount++;
+            touchedYAxis = true;
+            if (yCount == 2) {
+                // One cycle completes
+                yCount = 0;
+                cycleCount++;
+                Sphere sphere1 = new Sphere(2);
+                sphere1.translateXProperty().set(x1);
+                sphere1.translateYProperty().set(y1);
+
+                Sphere sphere2 = new Sphere(2);
+                sphere2.translateXProperty().set(x2);
+                sphere2.translateYProperty().set(y2);
+                displayPane.getChildren().addAll(sphere1, sphere2);
+            }
+
+        } else if (Math.round(y1) != 0 && touchedYAxis) {
+            touchedYAxis = false;
+        }
     }
 
     private void drawTracks(double x1, double y1, double x2, double y2,
@@ -279,8 +305,8 @@ public class Simulation extends Application {
 
         // Move M3
         double x3 = 0;
-        sphere3.translateXProperty().set(x3);
         double y3 = 0;
+        sphere3.translateXProperty().set(x3);
         sphere3.translateYProperty().set(y3);
         sphere3.translateZProperty().set(z);
 
