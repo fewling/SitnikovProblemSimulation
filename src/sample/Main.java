@@ -7,7 +7,6 @@ import javafx.scene.Camera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
@@ -44,7 +43,7 @@ public class Main extends Application {
     private static final double SUBSCENE_HEIGHT = 800;
     private static final double FAR_CLIP = 20000;        // Maximum range of camera view
     private static final double NEAR_CLIP = 0.1;         // Minimum range of camera view
-    private static final String PATH_NAME = "result.xlsx";
+    private static final String PATH_NAME = "results.xlsx";
 
     // Initial conditions:
     private static final double TIMESTEP = 0.0001;      // Customizable
@@ -52,20 +51,18 @@ public class Main extends Application {
     private static final double Gm = 0;                 // Customizable, Gravitational Constant (M3)
     private static final double LARGE_RADIUS = 0.1;     // Radius for M1 & M2
     private static final double SMALL_RADIUS = 0.05;     // Radius for M3
-    private static final double ECCENTRICITY = 0.8;
+    private static final double ECCENTRICITY = 0.2;
     private static final double SEMI_MAJOR_AXIS = 1;
     private static final double ANOMALY_STEP = 0.1;
 
     private double x1 = -1, y1 = 0;
     private double x2 = 1, y2 = 0;
     private double vX1 = 0, vY1 = -0.5;
-    private double vXOfSphere2 = 0, vY2 = 0.5;
-    private final double xOfSphere3 = 0;
-    private final double yOfSphere3 = 0;
+    private double vX2 = 0, vY2 = -0.5;
     private double z3 = 1.5;                     // Customizable
-    private double vZ3 = 0;                     // Customizable, but depends on zOfSphere, max when zOfSphere == 0
-    private double anomaly1 = 0;
-    private double anomaly2 = Math.PI;
+    private double vZ3 = 0;                      // Customizable, but depends on zOfSphere, max when zOfSphere == 0
+    private double anomaly1 = 180;
+    private double anomaly2 = 180;
 
     private final Sphere sphere1 = new Sphere();
     private final Sphere sphere2 = new Sphere();
@@ -129,16 +126,16 @@ public class Main extends Application {
         // Camera controls:
         primaryStage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             switch (event.getCode()) {
-                case A -> translate.setX(translate.getX() - 5);
-                case D -> translate.setX(translate.getX() + 5);
-                case W -> translate.setY(translate.getY() + 5);
-                case S -> translate.setY(translate.getY() - 5);
-                case LEFT -> rotateY.setAngle(rotateY.getAngle() + 5);
-                case RIGHT -> rotateY.setAngle(rotateY.getAngle() - 5);
-                case UP -> rotateX.setAngle(rotateX.getAngle() - 5);
-                case DOWN -> rotateX.setAngle(rotateX.getAngle() + 5);
-                case I -> translate.setZ(translate.getZ() + 5);
-                case O -> translate.setZ(translate.getZ() - 5);
+                case A -> translate.setX(translate.getX() - 1);
+                case D -> translate.setX(translate.getX() + 1);
+                case W -> translate.setY(translate.getY() + 1);
+                case S -> translate.setY(translate.getY() - 1);
+                case LEFT -> rotateY.setAngle(rotateY.getAngle() + 1);
+                case RIGHT -> rotateY.setAngle(rotateY.getAngle() - 1);
+                case UP -> rotateX.setAngle(rotateX.getAngle() - 1);
+                case DOWN -> rotateX.setAngle(rotateX.getAngle() + 1);
+                case I -> translate.setZ(translate.getZ() + 10);
+                case O -> translate.setZ(translate.getZ() - 10);
             }
         });
         primaryStage.setOnCloseRequest(windowEvent -> saveExcel(workbook));
@@ -226,7 +223,7 @@ public class Main extends Application {
         row2.createCell(6).setCellValue(vY1);
         row2.createCell(8).setCellValue(x2);
         row2.createCell(9).setCellValue(y2);
-        row2.createCell(10).setCellValue(vXOfSphere2);
+        row2.createCell(10).setCellValue(vX2);
         row2.createCell(11).setCellValue(vY2);
         row2.createCell(13).setCellValue(z3);
         row2.createCell(14).setCellValue(vZ3);
@@ -278,33 +275,6 @@ public class Main extends Application {
         // Create a VBox to hold all widgets
         VBox leftControl = new VBox();
 
-        Button topViewBtn = new Button("Top View");
-        Button tiltViewBtn = new Button("Tilt View");   // default view
-        topViewBtn.setDisable(false);
-        tiltViewBtn.setDisable(true);
-
-        topViewBtn.setOnAction(actionEvent -> {
-            camera.getTransforms().addAll(
-                    rotateX = new Rotate(290, Rotate.X_AXIS),
-                    rotateY = new Rotate(0, Rotate.Y_AXIS),
-                    rotateZ = new Rotate(0, Rotate.Z_AXIS),
-                    translate = new Translate(-60, -935, -1030));
-            topViewBtn.setDisable(true);
-            tiltViewBtn.setDisable(false);
-        });
-
-        tiltViewBtn.setOnAction(actionEvent -> {
-            camera.getTransforms().addAll(
-                    rotateX = new Rotate(70, Rotate.X_AXIS),
-                    rotateY = new Rotate(0, Rotate.Y_AXIS),
-                    rotateZ = new Rotate(0, Rotate.Z_AXIS),
-                    translate = new Translate(60, 935, -1030));
-            topViewBtn.setDisable(false);
-            tiltViewBtn.setDisable(true);
-        });
-
-        leftControl.getChildren().add(topViewBtn);
-        leftControl.getChildren().add(tiltViewBtn);
         leftControl.getChildren().add(currentSphere1XLabel);
         leftControl.getChildren().add(currentSphere1YLabel);
         leftControl.getChildren().add(currentSphere2XLabel);
@@ -359,64 +329,124 @@ public class Main extends Application {
         }
     }
 
+//    private void calculate() {
+//
+//        // record current locations:
+//        double lastX1 = x1;
+//        double lastY1 = y1;
+//        double lastX2 = x2;
+//        double lastY2 = y2;
+//        double lastZ3 = z3;
+//
+//
+//        // record current velocities:
+//        double lastVX1 = vX1;
+//        double lastVY1 = vY1;
+//        double lastVX2 = vX2;
+//        double lastVY2 = vY2;
+//        double lastVZ3 = vZ3;
+//
+//
+//        // Calculate and update velocities and locations (M1):
+//        double denominatorForM1 = 2 * Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly1)), 3);
+//        vX1 += (-1 / denominatorForM1) * x1 * TIMESTEP;
+//        x1 += lastVX1 * TIMESTEP;
+//
+//        vY1 += (-1 / denominatorForM1) * y1 * TIMESTEP;
+//        y1 += lastVY1 * TIMESTEP;
+//
+//
+//        // Calculate and update velocities and locations (M2):
+//        double denominatorForM2 = 2 * Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly2)), 3);
+//        vX2 += (-1 / denominatorForM2) * x2 * TIMESTEP;
+//        x2 += lastVX2 * TIMESTEP;
+//
+//        vY2 += (-1 / denominatorForM2) * y2 * TIMESTEP;
+//        y2 += lastVY2 * TIMESTEP;
+//
+//
+//        // Calculate and update velocities and locations (M3):
+//        double squareOfZ = Math.pow(z3, 2);
+//        double squareOfAnomaly = Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly1)), 2);
+//        double denominatorForM3 = Math.pow(squareOfZ + squareOfAnomaly, 1.5);
+//        vZ3 += (-1) * ((4 * GM) / denominatorForM3) * z3 * TIMESTEP;
+//        z3 += lastVZ3 * TIMESTEP;
+//
+//        if (anomaly1 >= 2 * Math.PI) {
+//            anomaly1 = 0;
+//        } else {
+//            anomaly1 += ANOMALY_STEP;
+//        }
+//        if (anomaly2 >= 2 * Math.PI) {
+//            anomaly2 = 0;
+//        } else {
+//            anomaly2 += ANOMALY_STEP;
+//        }
+//
+//        countCycles();
+//        move(x1, y1, x2, y2, z3);
+//        writeCurrentPos(x1, y1, x2, y2);
+////        drawTracks(x1, y1, x2, y2, lastX1, lastY1, lastX2, lastY2);
+//    }
+
+
     private void calculate() {
 
-        // record current locations:
         double lastX1 = x1;
         double lastY1 = y1;
         double lastX2 = x2;
         double lastY2 = y2;
-        double lastZ3 = z3;
-
-
-        // record current velocities:
         double lastVX1 = vX1;
         double lastVY1 = vY1;
-        double lastVX2 = vXOfSphere2;
+        double lastVX2 = vX2;
         double lastVY2 = vY2;
         double lastVZ3 = vZ3;
 
+        double up = SEMI_MAJOR_AXIS * (1 - Math.pow(ECCENTRICITY, 2));
+        double down1 = 1 + ECCENTRICITY * Math.cos(anomaly1);
+        double down2 = 1 + ECCENTRICITY * Math.cos(anomaly2);
+        double denominator1 = 2 * Math.pow((up / down1), 3);
+        double denominator2 = 2 * Math.pow((up / down2), 3);
+        double left3 = Math.pow(up / down1, 2);
+        double right3 = Math.pow(z3, 2);
+        double denominator3 = Math.pow(left3 + right3, 1.5);
 
-        // Calculate and update velocities and locations (M1):
-        double denominatorForM1 = 2 * Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly1)), 3);
-        vX1 += (-1 / denominatorForM1) * x1 * TIMESTEP;
-        x1 += lastVX1 * TIMESTEP;
+//        double denominator1 = 2 * Math.pow((SEMI_MAJOR_AXIS * (1 - Math.pow(ECCENTRICITY, 2)))
+//                / (1 + ECCENTRICITY * Math.cos(anomaly1)), 3);
+//        double denominator2 = 2 * Math.pow((SEMI_MAJOR_AXIS * (1 - Math.pow(ECCENTRICITY, 2)))
+//                / (1 + ECCENTRICITY * Math.cos(anomaly2)), 3);
+//        double denominator3 = Math.pow(z3, 2) + Math.pow((SEMI_MAJOR_AXIS * (1 - Math.pow(ECCENTRICITY, 2)))
+//                / (1 + ECCENTRICITY * Math.cos(anomaly2)), 2);
+//        double powOfDenominator3 = Math.pow(denominator3, 1.5);
 
-        vY1 += (-1 / denominatorForM1) * y1 * TIMESTEP;
-        y1 += lastVY1 * TIMESTEP;
+        vX1 = lastVX1 + -1 * (GM / denominator1) * x1 * TIMESTEP;
+        vY1 = lastVY1 + -1 * (GM / denominator1) * y1 * TIMESTEP;
+        x1 = x1 + lastVX1 * TIMESTEP;
+        y1 = y1 + lastVY1 * TIMESTEP;
 
+        vX2 = lastVX2 + -1 * (GM / denominator2) * x2 * TIMESTEP;
+        vY2 = lastVY2 + -1 * (GM / denominator2) * y2 * TIMESTEP;
+        x2 = x2 + lastVX2 * TIMESTEP;
+        y2 = y2 + lastVY2 * TIMESTEP;
 
-        // Calculate and update velocities and locations (M2):
-        double denominatorForM2 = 2 * Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly2)), 3);
-        vXOfSphere2 += (-1 / denominatorForM2) * x2 * TIMESTEP;
-        x2 += lastVX2 * TIMESTEP;
+        vZ3 = lastVZ3 + -1 * ((4 * GM) / denominator3) * z3 * TIMESTEP;
+        z3 = z3 + lastVZ3 * TIMESTEP;
 
-        vY2 += (-1 / denominatorForM2) * y2 * TIMESTEP;
-        y2 += lastVY2 * TIMESTEP;
-
-
-        // Calculate and update velocities and locations (M3):
-        double squareOfZ = Math.pow(z3, 2);
-        double squareOfAnomaly = Math.pow(SEMI_MAJOR_AXIS * (1 - ECCENTRICITY * Math.cos(anomaly1)), 2);
-        double denominatorForM3 = Math.pow(squareOfZ + squareOfAnomaly, 1.5);
-        vZ3 += (-1) * ((4 * GM) / denominatorForM3) * z3 * TIMESTEP;
-        z3 += lastVZ3 * TIMESTEP;
-
-        if (anomaly1 >= 2 * Math.PI) {
+        if (anomaly1 >= 360) {
             anomaly1 = 0;
         } else {
             anomaly1 += ANOMALY_STEP;
         }
-        if (anomaly2 >= 2 * Math.PI) {
+        if (anomaly2 >= 360) {
             anomaly2 = 0;
         } else {
             anomaly2 += ANOMALY_STEP;
         }
 
-        countCycles();
         move(x1, y1, x2, y2, z3);
         writeCurrentPos(x1, y1, x2, y2);
 //        drawTracks(x1, y1, x2, y2, lastX1, lastY1, lastX2, lastY2);
+//        checkCameraProperties();
     }
 
     private void countCycles() {
@@ -446,7 +476,7 @@ public class Main extends Application {
                 startingRow.createCell(6).setCellValue(vY1);
                 startingRow.createCell(8).setCellValue(x2);
                 startingRow.createCell(9).setCellValue(y2);
-                startingRow.createCell(10).setCellValue(vXOfSphere2);
+                startingRow.createCell(10).setCellValue(vX2);
                 startingRow.createCell(11).setCellValue(vY2);
                 startingRow.createCell(13).setCellValue(z3);
                 startingRow.createCell(14).setCellValue(vZ3);
@@ -490,8 +520,10 @@ public class Main extends Application {
         sphere2.translateYProperty().set(y2);
 
         // Move M3
-        sphere3.translateXProperty().set(xOfSphere3);
-        sphere3.translateYProperty().set(yOfSphere3);
+        double x3 = 0;
+        sphere3.translateXProperty().set(x3);
+        double y3 = 0;
+        sphere3.translateYProperty().set(y3);
         sphere3.translateZProperty().set(z);
 
         // Update the labels:
