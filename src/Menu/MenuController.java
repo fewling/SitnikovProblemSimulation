@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public class MenuController {
     }
 
     @FXML
-    void onStartButtonClicked() {
+    void onStartButtonClicked() throws IOException {
 
         List<TextField> textFieldList = getAllTextFields();
         boolean allCorrectFilled = checkTextField(textFieldList);
@@ -92,7 +93,7 @@ public class MenuController {
         return true;
     }
 
-    private void showSimulatorWindow() {
+    private void showSimulatorWindow() throws IOException {
 
         Stage stage = new Stage();
         Simulation simulation = new Simulation(getInputFieldMap());
@@ -110,7 +111,7 @@ public class MenuController {
         map.put("y1", "0");
         map.put("vX1", "0");
         map.put("vY1", m1InitialVelocityTextField.getText());
-        map.put("x2", "-" + m1InitialPosTextField.getText());
+        map.put("x2", String.valueOf(-1 * Double.parseDouble(m1InitialPosTextField.getText())));
         map.put("y2", "0");
         map.put("vX2", "0");
         map.put("vY2", "-" + m1InitialVelocityTextField.getText());

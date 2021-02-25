@@ -1,19 +1,17 @@
 package Simulation;
 
+import WorkBook.ExcelRecord;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
-import javafx.scene.Camera;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
-import javafx.scene.SubScene;
+import javafx.scene.*;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
@@ -22,20 +20,22 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Simulation extends Application {
 
-
-    private static final double SCREEN_WIDTH = 1000;
-    private static final double SCREEN_HEIGHT = 800;
+    private static final String IC_SHEET = "Initial Conditions";
+    private static final String DATA_SHEET = "Data";
     private static final double SUBSCENE_WIDTH = 800;
     private static final double SUBSCENE_HEIGHT = 800;
-
-    private static final double LARGE_RADIUS = 10;
-    private static final double SMALL_RADIUS = 8;
 
     private final double timeStep;
     private final double GM;
@@ -55,11 +55,28 @@ public class Simulation extends Application {
     private Rotate cameraRotateX, cameraRotateY, cameraRotateZ;
     private final int cameraStep = 10;
 
-    private int cycleCount = 0, yCount = 0;
+    private ExcelRecord excelInstance;
+    private final HashMap<String, String> dataMap;
+    private LinkedList<Double> x1List0, y1List3;
+    private LinkedList<Double> x1List2, y1List1;
+    private LinkedList<Double> x2List0, y2List3;
+    private LinkedList<Double> x2List2, y2List1;
+    private LinkedList<Double> z3List0;
+    private LinkedList<Double> z3List2;
+    private LinkedList<Double> z3List3;
+    private LinkedList<Double> z3List1;
+    private LinkedList<Double> vy1List0, vx1List1, vy1List2, vx1List3;
+    private LinkedList<Double> vy2List0, vx2List1, vy2List2, vx2List3;
+    private LinkedList<Double> vz3List0, vz3List1, vz3List2, vz3List3;
+    private int cycleCount = 0, xCount = 0, yCount = 0;
     private boolean touchedYAxis = true;
+    private boolean touchedXAxis = false;
+
+    private FXMLLoader loader;
 
     // Constructor receives the input fields
     public Simulation(Map<String, String> inputFieldMap) {
+
         this.timeStep = Double.parseDouble(inputFieldMap.get("time_step"));
         this.GM = Double.parseDouble(inputFieldMap.get("GM"));
         this.Gm = Double.parseDouble(inputFieldMap.get("Gm"));
@@ -67,28 +84,149 @@ public class Simulation extends Application {
         this.y1 = Double.parseDouble(inputFieldMap.get("y1"));
         this.vX1 = Double.parseDouble(inputFieldMap.get("vX1"));
         this.vY1 = Double.parseDouble(inputFieldMap.get("vY1"));
+        this.x2 = Double.parseDouble(inputFieldMap.get("x2"));
+        this.y2 = Double.parseDouble(inputFieldMap.get("y2"));
         this.vX2 = Double.parseDouble(inputFieldMap.get("vX2"));
         this.vY2 = Double.parseDouble(inputFieldMap.get("vY2"));
         this.z3 = Double.parseDouble(inputFieldMap.get("z3"));
         this.vZ3 = Double.parseDouble(inputFieldMap.get("vZ3"));
+
         drawTrack = inputFieldMap.get("draw track").equals("true");
 
-        this.x2 = -1 * x1;
-        this.y2 = 0;
+        dataMap = new HashMap<>();
+        dataMap.putAll(inputFieldMap);
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
 
-        // init:
+        // Init:
+        initList();
+        initExcel();
         setAppearances();
         setAnimation();
+
         Scene scene = setupScene();
+        scene.widthProperty().addListener((observableValue,
+                                           oldSceneWidth,
+                                           newSceneWidth) -> subScene.widthProperty().set(scene.getWidth() - 250));
+        scene.heightProperty().addListener((observableValue,
+                                            oldSceneHeight,
+                                            newSceneHeight) -> subScene.heightProperty().set(scene.getHeight()));
         setCamera(primaryStage);
 
         primaryStage.setTitle("Sitnikov's Problem Simulator");
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
+        primaryStage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,
+                windowEvent -> {
+                    writeToExcel();
+                    excelInstance.saveFile();
+                });
         primaryStage.show();
+    }
+
+    private void writeToExcel() {
+        excelInstance.writeList(DATA_SHEET, 0, x1List0);
+        excelInstance.writeList(DATA_SHEET, 1, y1List1);
+        excelInstance.writeList(DATA_SHEET, 2, x1List2);
+        excelInstance.writeList(DATA_SHEET, 3, y1List3);
+
+        excelInstance.writeList(DATA_SHEET, 5, x2List0);
+        excelInstance.writeList(DATA_SHEET, 6, y2List1);
+        excelInstance.writeList(DATA_SHEET, 7, x2List2);
+        excelInstance.writeList(DATA_SHEET, 8, y2List3);
+
+        excelInstance.writeList(DATA_SHEET, 10, z3List0);
+        excelInstance.writeList(DATA_SHEET, 11, z3List1);
+        excelInstance.writeList(DATA_SHEET, 12, z3List2);
+        excelInstance.writeList(DATA_SHEET, 13, z3List3);
+
+        excelInstance.writeList(DATA_SHEET, 15, vy1List0);
+        excelInstance.writeList(DATA_SHEET, 16, vx1List1);
+        excelInstance.writeList(DATA_SHEET, 17, vy1List2);
+        excelInstance.writeList(DATA_SHEET, 18, vx1List3);
+
+        excelInstance.writeList(DATA_SHEET, 20, vy2List0);
+        excelInstance.writeList(DATA_SHEET, 21, vx2List1);
+        excelInstance.writeList(DATA_SHEET, 22, vy2List2);
+        excelInstance.writeList(DATA_SHEET, 23, vx2List3);
+
+        excelInstance.writeList(DATA_SHEET, 25, vz3List0);
+        excelInstance.writeList(DATA_SHEET, 26, vz3List1);
+        excelInstance.writeList(DATA_SHEET, 27, vz3List2);
+        excelInstance.writeList(DATA_SHEET, 28, vz3List3);
+    }
+
+    private void initList() {
+        x1List0 = new LinkedList<>();
+        y1List3 = new LinkedList<>();
+        x2List0 = new LinkedList<>();
+        y2List3 = new LinkedList<>();
+        x1List2 = new LinkedList<>();
+        y1List1 = new LinkedList<>();
+        x2List2 = new LinkedList<>();
+        y2List1 = new LinkedList<>();
+        z3List0 = new LinkedList<>();
+        z3List3 = new LinkedList<>();
+        z3List2 = new LinkedList<>();
+        z3List1 = new LinkedList<>();
+        vy1List0 = new LinkedList<>();
+        vx1List1 = new LinkedList<>();
+        vy1List2 = new LinkedList<>();
+        vx1List3 = new LinkedList<>();
+        vy2List0 = new LinkedList<>();
+        vx2List1 = new LinkedList<>();
+        vy2List2 = new LinkedList<>();
+        vx2List3 = new LinkedList<>();
+        vz3List0 = new LinkedList<>();
+        vz3List1 = new LinkedList<>();
+        vz3List2 = new LinkedList<>();
+        vz3List3 = new LinkedList<>();
+        x1List0.add(x1);
+        x2List0.add(x2);
+        z3List0.add(z3);
+        vy1List0.add(vY1);
+        vy2List0.add(vY2);
+        vz3List0.add(vZ3);
+    }
+
+    private void initExcel() throws IOException {
+        excelInstance = ExcelRecord.getInstance();
+        excelInstance.createSheet(DATA_SHEET);
+        Sheet sheet = excelInstance.getSheet(IC_SHEET);
+        excelInstance.writeInitialConditions(sheet, dataMap);
+        sheet = excelInstance.getSheet(DATA_SHEET);
+        Row row = sheet.createRow(0);
+        row.createCell(0).setCellValue("x1 (0T)");
+        row.createCell(1).setCellValue("y1 (1/4T)");
+        row.createCell(2).setCellValue("x1 (2/4T)");
+        row.createCell(3).setCellValue("y1 (3/4T)");
+
+        row.createCell(5).setCellValue("x2 (0T)");
+        row.createCell(6).setCellValue("y2 (1/4T)");
+        row.createCell(7).setCellValue("x2 (2/4T)");
+        row.createCell(8).setCellValue("y2 (3/4T)");
+
+        row.createCell(10).setCellValue("z3 (0T)");
+        row.createCell(11).setCellValue("z3 (1/4T)");
+        row.createCell(12).setCellValue("z3 (2/4T)");
+        row.createCell(13).setCellValue("z3 (3/4T)");
+
+        row.createCell(15).setCellValue("vy1 (0T)");
+        row.createCell(16).setCellValue("vx1 (1/4T)");
+        row.createCell(17).setCellValue("vy1 (2/4T)");
+        row.createCell(18).setCellValue("vx1 (3/4T)");
+
+        row.createCell(20).setCellValue("vy2 (0T)");
+        row.createCell(21).setCellValue("vx2 (1/4T)");
+        row.createCell(22).setCellValue("vy2 (2/4T)");
+        row.createCell(23).setCellValue("vx2 (3/4T)");
+
+        row.createCell(25).setCellValue("vz3 (0T)");
+        row.createCell(26).setCellValue("vz3 (1/4T)");
+        row.createCell(27).setCellValue("vz3 (2/4T)");
+        row.createCell(28).setCellValue("vz3 (3/4T)");
     }
 
     private void checkTransformation() {
@@ -135,9 +273,9 @@ public class Simulation extends Application {
     }
 
     private void setAppearances() {
-        sphere1.setRadius(LARGE_RADIUS);
-        sphere2.setRadius(LARGE_RADIUS);
-        sphere3.setRadius(SMALL_RADIUS);
+        sphere1.setRadius(10);
+        sphere2.setRadius(10);
+        sphere3.setRadius(8);
 
         xAxis = createCylinderLine(new Point3D(-500, 0, 0), new Point3D(500, 0, 0));
         yAxis = createCylinderLine(new Point3D(0, -500, 0), new Point3D(0, 500, 0));
@@ -164,14 +302,18 @@ public class Simulation extends Application {
     }
 
     private void setAnimation() {
-        Timeline animation = new Timeline(new KeyFrame(Duration.millis(1), e -> calculate()));
+        Timeline animation = new Timeline(new KeyFrame(Duration.millis(1), e -> {
+            try {
+                calculate();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }));
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.play();
     }
 
-    // TODO: customize left VBox layout with SceneBuilder
-    // TODO: may try VBOX = FXMLLoader.load(getClass().getResource("left.fxml"));
-    private Scene setupScene() {
+    private Scene setupScene() throws IOException {
         // Create pane to display the animation.
         displayPane = new Pane();
 
@@ -185,17 +327,20 @@ public class Simulation extends Application {
         displayPane.setBackground(new Background(fill));
 
         // Create a VBox to hold all widgets.
-        VBox leftControl = new VBox();
+        loader = new FXMLLoader(getClass().getResource("leftPane.fxml"));
+        Parent leftPane = loader.load();
+//        leftPane.setMinWidth(250);
+//        leftPane.setMaxWidth(250);
 
         // Create splitPane to hold both controls and the subscene with displayPane.
         SplitPane splitPane = new SplitPane();
-        splitPane.getItems().addAll(leftControl, subScene);
+        splitPane.getItems().addAll(leftPane, subScene);
 
         // Create a main scene to hold the splitPane.
-        return new Scene(splitPane, SCREEN_WIDTH, SCREEN_HEIGHT);
+        return new Scene(splitPane);
     }
 
-    private void calculate() {
+    private void calculate() throws IOException {
 
         // Recording variables to draw tracks
         double lastX1 = x1;
@@ -256,31 +401,81 @@ public class Simulation extends Application {
         if (drawTrack) {
             drawTracks(x1, y1, x2, y2, lastX1, lastY1, lastX2, lastY2);
         }
-        countCycle();
+
+        int cycleNum = countCycle();
         move(x1, y1, x2, y2, z3);
+        LeftController leftController = loader.getController();
+        leftController.showData(x1, y1, x2, y2, z3, vX1, vY1, vX2, vY2, vZ3, cycleNum);
     }
 
-    private void countCycle() {
+    private int countCycle() {
         if (Math.round(y1) == 0 && !touchedYAxis) {
             yCount++;
             touchedYAxis = true;
-            if (yCount == 2) {
-                // One cycle completes
+            if (yCount == 1) {
+                // Half cycle completes
+                leaveMark();
+                x1List2.add(x1);
+                x2List2.add(x2);
+                z3List2.add(z3);
+                vy1List2.add(vY1);
+                vy2List2.add(vY2);
+                vz3List2.add(vZ3);
+
+            } else if (yCount == 2) {
+                // One full cycle completes
                 yCount = 0;
                 cycleCount++;
-                Sphere sphere1 = new Sphere(2);
-                sphere1.translateXProperty().set(x1);
-                sphere1.translateYProperty().set(y1);
-
-                Sphere sphere2 = new Sphere(2);
-                sphere2.translateXProperty().set(x2);
-                sphere2.translateYProperty().set(y2);
-                displayPane.getChildren().addAll(sphere1, sphere2);
+                leaveMark();
+                x1List0.add(x1);
+                x2List0.add(x2);
+                z3List0.add(z3);
+                vy1List0.add(vY1);
+                vy2List0.add(vY2);
+                vz3List0.add(vZ3);
             }
-
         } else if (Math.round(y1) != 0 && touchedYAxis) {
             touchedYAxis = false;
         }
+
+        if (Math.round(x1) == 0 && !touchedXAxis) {
+            xCount++;
+            touchedXAxis = true;
+            if (xCount == 1) {
+                // 1/4 T
+                leaveMark();
+                y1List1.add(y1);
+                y2List1.add(y2);
+                z3List1.add(z3);
+                vx1List1.add(vX1);
+                vx2List1.add(vX2);
+                vz3List1.add(vZ3);
+            } else if (xCount == 2) {
+                // 3/4 T
+                leaveMark();
+                xCount = 0;
+                y1List3.add(y1);
+                y2List3.add(y2);
+                z3List3.add(z3);
+                vx1List3.add(vX1);
+                vx2List3.add(vX2);
+                vz3List3.add(vZ3);
+            }
+        } else if (Math.round(x1) != 0 && touchedXAxis) {
+            touchedXAxis = false;
+        }
+        return cycleCount;
+    }
+
+    private void leaveMark() {
+        Sphere sphere1 = new Sphere(2);
+        sphere1.translateXProperty().set(x1);
+        sphere1.translateYProperty().set(y1);
+
+        Sphere sphere2 = new Sphere(2);
+        sphere2.translateXProperty().set(x2);
+        sphere2.translateYProperty().set(y2);
+        displayPane.getChildren().addAll(sphere1, sphere2);
     }
 
     private void drawTracks(double x1, double y1, double x2, double y2,
@@ -335,4 +530,5 @@ public class Simulation extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }

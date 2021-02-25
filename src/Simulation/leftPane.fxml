@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Simulation.LeftController">
+   <children>
+      <GridPane layoutY="183.0" prefHeight="270.0" prefWidth="184.0" AnchorPane.bottomAnchor="122.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label alignment="CENTER" text="Bodies" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <Label alignment="CENTER" text="X" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+            <Label alignment="CENTER" text="Y" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+            <Label alignment="CENTER" text="Z" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+            <Label alignment="CENTER" text="M1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Label alignment="CENTER" text="M2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Label alignment="CENTER" text="m3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+            <Label alignment="CENTER" text="Bodies" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Label alignment="CENTER" text="M1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+            <Label alignment="CENTER" text="M2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <Label alignment="CENTER" text="m3" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+            <Label fx:id="X1Label" alignment="CENTER" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Label fx:id="X2Label" alignment="CENTER" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+            <Label alignment="CENTER" text="VX" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Label fx:id="VX1Label" alignment="CENTER" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+            <Label fx:id="VX2Label" alignment="CENTER" text="Label" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+            <Label fx:id="Y1Label" alignment="CENTER" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Label fx:id="Y2Label" alignment="CENTER" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+            <Label alignment="CENTER" text="VY" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Label fx:id="VY1Label" alignment="CENTER" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+            <Label fx:id="VY2Label" alignment="CENTER" text="Label" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Label fx:id="Z3Label" alignment="CENTER" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+            <Label alignment="CENTER" text="VZ" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+            <Label alignment="CENTER" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <Label fx:id="VZ3Label" alignment="CENTER" text="Label" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+         </children>
+      </GridPane>
+      <Label layoutX="14.0" layoutY="289.0" prefHeight="17.0" prefWidth="75.0" text="Cycle counts:" AnchorPane.bottomAnchor="94.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="167.0" AnchorPane.topAnchor="289.0" />
+      <Label fx:id="cycleCountLabel" layoutX="83.0" layoutY="289.0" text="Label" AnchorPane.bottomAnchor="94.0" AnchorPane.leftAnchor="83.0" AnchorPane.rightAnchor="139.0" AnchorPane.topAnchor="289.0" />
+   </children>
+</AnchorPane>
