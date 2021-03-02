@@ -115,14 +115,18 @@ public class ExcelRecord {
     public void writeList(String sheetName, int cellNum, List<Double> dataList) {
         Sheet sheet = this.getSheet(sheetName);
         int rowNum = 1;
-        for (double val : dataList) {
+        for (Double val : dataList) {
             Row row;
             if (sheet.getRow(rowNum) == null) {
                 row = sheet.createRow(rowNum);
             } else {
                 row = sheet.getRow(rowNum);
             }
-            row.createCell(cellNum).setCellValue(val);
+            if (val == null) {
+                row.createCell(cellNum).setCellValue("null");
+            } else {
+                row.createCell(cellNum).setCellValue(val);
+            }
             rowNum++;
         }
     }

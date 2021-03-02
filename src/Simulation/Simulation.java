@@ -71,6 +71,8 @@ public class Simulation extends Application {
     private int cycleCount = 0, xCount = 0, yCount = 0;
     private boolean touchedYAxis = true;
     private boolean touchedXAxis = false;
+    private double minY1, maxY1, minY2, maxY2;
+    private double minvX1, maxvX1, minvX2, maxvX2;
 
     private FXMLLoader loader;
 
@@ -104,7 +106,7 @@ public class Simulation extends Application {
         initList();
         initExcel();
         setAppearances();
-        setAnimation();
+        setAnimation(); // 1ms per calculation
 
         Scene scene = setupScene();
         scene.widthProperty().addListener((observableValue,
@@ -342,6 +344,11 @@ public class Simulation extends Application {
 
     private void calculate() throws IOException {
 
+        int cycleCounts = countCycle();
+        LeftController leftController = loader.getController();
+        leftController.showData(x1, y1, x2, y2, z3, vX1, vY1, vX2, vY2, vZ3, cycleCounts);
+        move(x1, y1, x2, y2, z3);
+
         // Recording variables to draw tracks
         double lastX1 = x1;
         double lastY1 = y1;
@@ -401,20 +408,52 @@ public class Simulation extends Application {
         if (drawTrack) {
             drawTracks(x1, y1, x2, y2, lastX1, lastY1, lastX2, lastY2);
         }
-
-        int cycleNum = countCycle();
-        move(x1, y1, x2, y2, z3);
-        LeftController leftController = loader.getController();
-        leftController.showData(x1, y1, x2, y2, z3, vX1, vY1, vX2, vY2, vZ3, cycleNum);
     }
 
     private int countCycle() {
+        if (yCount == 0) {
+
+            if (maxY1 < y1)
+                maxY1 = y1;
+
+            if (y2 < minY2)
+                minY2 = y2;
+
+            if (maxvX1 < vX1)
+                maxvX1 = vX1;
+
+            if (minvX2 > vX2)
+                minvX2 = vX2;
+        } else if (yCount == 1) {
+
+            if (y1 < minY1)
+                minY1 = y1;
+
+            if (maxY2 < y2)
+                maxY2 = y2;
+
+            if (minvX1 > vX1)
+                minvX1 = vX1;
+
+            if (maxvX2 < vX2)
+                maxvX2 = vX2;
+        }
+
         if (Math.round(y1) == 0 && !touchedYAxis) {
             yCount++;
             touchedYAxis = true;
+
             if (yCount == 1) {
-                // Half cycle completes
+                // 2/4T
                 leaveMark();
+
+                y1List1.add(maxY1);
+                y2List1.add(minY2);
+                z3List1.add(null);
+                vx1List1.add(maxvX1);
+                vx2List1.add(minvX2);
+                vz3List1.add(null);
+
                 x1List2.add(x1);
                 x2List2.add(x2);
                 z3List2.add(z3);
@@ -433,6 +472,13 @@ public class Simulation extends Application {
                 vy1List0.add(vY1);
                 vy2List0.add(vY2);
                 vz3List0.add(vZ3);
+
+                y1List3.add(minY1);
+                y2List3.add(maxY2);
+                z3List3.add(null);
+                vx1List3.add(minvX1);
+                vx2List3.add(maxvX2);
+                vz3List3.add(null);
             }
         } else if (Math.round(y1) != 0 && touchedYAxis) {
             touchedYAxis = false;
@@ -442,24 +488,18 @@ public class Simulation extends Application {
             xCount++;
             touchedXAxis = true;
             if (xCount == 1) {
-                // 1/4 T
+                // 1/4 T (not true)
                 leaveMark();
-                y1List1.add(y1);
-                y2List1.add(y2);
-                z3List1.add(z3);
-                vx1List1.add(vX1);
-                vx2List1.add(vX2);
-                vz3List1.add(vZ3);
             } else if (xCount == 2) {
                 // 3/4 T
                 leaveMark();
                 xCount = 0;
-                y1List3.add(y1);
-                y2List3.add(y2);
-                z3List3.add(z3);
-                vx1List3.add(vX1);
-                vx2List3.add(vX2);
-                vz3List3.add(vZ3);
+//                y1List3.add(y1);
+//                y2List3.add(y2);
+//                z3List3.add(z3);
+//                vx1List3.add(vX1);
+//                vx2List3.add(vX2);
+//                vz3List3.add(vZ3);
             }
         } else if (Math.round(x1) != 0 && touchedXAxis) {
             touchedXAxis = false;
