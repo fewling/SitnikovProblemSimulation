@@ -61,7 +61,7 @@ public class LeftController {
 
     private double roundToThreeSig(double value) {
         BigDecimal bigDecimal = new BigDecimal(value);
-        bigDecimal = bigDecimal.round(new MathContext(3));
+        bigDecimal = bigDecimal.round(new MathContext(5));
         return bigDecimal.doubleValue();
     }
 }

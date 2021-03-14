@@ -245,7 +245,7 @@ public class Simulation extends Application {
         camera.setFarClip(20000);
         camera.setNearClip(0.1);
         subScene.setCamera(camera);
-        cameraTranslate = new Translate(960, 1870, -680);
+        cameraTranslate = new Translate(2000, 3430, -1470);
         cameraRotateX = new Rotate(70, Rotate.X_AXIS);
         cameraRotateY = new Rotate(-25, Rotate.Y_AXIS);
         cameraRotateZ = new Rotate(-10, Rotate.Z_AXIS);
@@ -275,13 +275,13 @@ public class Simulation extends Application {
     }
 
     private void setAppearances() {
-        sphere1.setRadius(10);
-        sphere2.setRadius(10);
-        sphere3.setRadius(8);
+        sphere1.setRadius(50);
+        sphere2.setRadius(50);
+        sphere3.setRadius(20);
 
-        xAxis = createCylinderLine(new Point3D(-500, 0, 0), new Point3D(500, 0, 0));
-        yAxis = createCylinderLine(new Point3D(0, -500, 0), new Point3D(0, 500, 0));
-        zAxis = createCylinderLine(new Point3D(0, 0, -300), new Point3D(0, 0, 300));
+        xAxis = createCylinderLine(new Point3D(-2000, 0, 0), new Point3D(2000, 0, 0));
+        yAxis = createCylinderLine(new Point3D(0, -2000, 0), new Point3D(0, 2000, 0));
+        zAxis = createCylinderLine(new Point3D(0, 0, -1000), new Point3D(0, 0, 1000));
 
         PhongMaterial material1 = new PhongMaterial();
         material1.setDiffuseColor(Color.ORANGE);
