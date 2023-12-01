@@ -1,5 +1,5 @@
-# FYP_SitnikovProblemSimulation
-Final Year Project (Physics, Celestial mechanics, Computational method)
+# SitnikovProblemSimulation
+(Physics, Celestial mechanics, Computational method)
 
 # What is Three body problem?
 In physics and classical mechanics, the three-body problem is the problem of taking the initial positions and 
